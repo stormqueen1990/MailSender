@@ -1,1 +1,2 @@
-Library for sending mail via SMTP protocol, built using the Qt Framework (http://qt.nokia.com/)
+Library for sending mail via SMTP protocol, built using the Qt Framework (http://qt.nokia.com/).
+Requires Qt4.
