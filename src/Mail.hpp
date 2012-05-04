@@ -2,6 +2,9 @@
 #define MAIL_HPP
 
 #include <QString>
+#include <QStringList>
+#include <QList>
+#include <QByteArray>
 
 class Mail {
 public:
@@ -10,24 +13,26 @@ public:
 	~Mail() {
 	}
 
-	QString getFromAddress();
-	void setFromAddress(QString);
-	QString getToAddress();
-	void setToAddress(QString);
+	QStringList getToAddress();
+	void setToAddress(QStringList);
+	QStringList getCcAddress();
+	void setCcAddress(QStringList);
+	QStringList getBccAddress();
+	void setBccAddress(QStringList);
 	QString getSubject();
 	void setSubject(QString);
 	QString getBodyData();
 	void setBodyData(QString);
+	QList<QByteArray> getAttachments();
+	void setAttachments(QList<QByteArray>);
 
 private:
-	QString fromAddress;
-	QString toAddress;
-	QString ccAddress;
-	QString bccAddress;
+	QStringList toAddress;
+	QStringList ccAddress;
+	QStringList bccAddress;
 	QString subject;
-	QString headers;
 	QString bodyData;
-	QString attachments;
+	QList<QByteArray> attachments;
 };
 
 #endif // MAIL_HPP

@@ -11,7 +11,7 @@ SMTPClient::SMTPClient(QString host, quint16 port, QString domain, QString usern
 
 	// Connects the socket
 	smtpSocket = new QSslSocket();
-	
+
 	smtpSocket->open(QIODevice::ReadWrite);
 }
 
@@ -31,7 +31,7 @@ bool SMTPClient::connect() {
 	return res;
 }
 
-bool SMTPClient::sendMail() {
+bool SMTPClient::sendMail(Mail mail) {
 	if(disconnected) {
 		QObject::disconnect(smtpSocket, SIGNAL(encryptedBytesWritten(qint64)), this, SLOT(dataSent()));
 		smtpSocket->disconnectFromHost();
@@ -46,13 +46,38 @@ bool SMTPClient::sendMail() {
 	}
 
 	if(!sendHello()) {
+		qDebug() << "HELLO SENT";
+		return false;
+	}
+
+	if(!sendAuth()) {
+		return false;
+	}
+
+	if(!sendUser()) {
+		return false;
+	}
+
+	if(!sendPass()) {
+		return false;
+	}
+
+	if(!sendMailFrom()) {
+		return false;
+	}
+
+	if(!sendReceiptTo(mail)) {
+		return false;
+	}
+
+	if(!sendBodyData(mail)) {
 		return false;
 	}
 
 	if(!sendQuit()) {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -63,16 +88,68 @@ bool SMTPClient::sendHello() {
 	return waitForSent();
 }
 
+bool SMTPClient::sendAuth() {
+	smtpSocket->write("AUTH LOGIN\r\n");
+	return waitForSent();
+}
+
+bool SMTPClient::sendUser() {
+	smtpSocket->write(username.toUtf8().toBase64());
+	smtpSocket->write("\r\n");
+	return waitForSent();
+}
+
+bool SMTPClient::sendPass() {
+	smtpSocket->write(password.toUtf8().toBase64());
+	smtpSocket->write("\r\n");
+	return waitForSent();
+}
+
 bool SMTPClient::sendMailFrom() {
-	return true;
+	smtpSocket->write("MAIL FROM:<");
+	smtpSocket->write(username.toUtf8());
+	smtpSocket->write(">\r\n");
+	return waitForSent();
 }
 
-bool SMTPClient::sendReceiptTo() {
-	return true;
+bool SMTPClient::sendReceiptTo(Mail mail) {
+	foreach(QString to, mail.getToAddress()) {
+		QString receiptTo("RCPT TO:");
+		receiptTo.append("<").append(to.toUtf8());
+		receiptTo.append(">\r\n");
+		smtpSocket->write(receiptTo.toUtf8());
+	}
+	return waitForSent();
 }
 
-bool SMTPClient::sendBodyData() {
-	return true;
+bool SMTPClient::sendBodyData(Mail mail) {
+	smtpSocket->write("DATA\r\n");
+	if(waitForSent()) {
+		QString bodyData("From: ");
+		bodyData.append(username);
+		bodyData.append("\r\n");
+		bodyData.append("To: ");
+
+		foreach(QString to, mail.getToAddress()) {
+			bodyData.append(to);
+			bodyData.append(",");
+		}
+
+		bodyData.append("\r\n");
+		bodyData.append("Subject: ");
+		bodyData.append(mail.getSubject());
+		bodyData.append("\r\n");
+		bodyData.append("Content-Type: text/plain; charset=utf-8\r\n");
+		bodyData.append("\r\n");
+		bodyData.append(mail.getBodyData());
+		bodyData.append("\r\n.\r\n");
+
+		smtpSocket->write(bodyData.toUtf8());
+
+		return waitForSent();
+	}
+
+	return false;
 }
 
 bool SMTPClient::sendQuit() {

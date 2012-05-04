@@ -11,7 +11,7 @@ Q_OBJECT
 public:
 	SMTPClient(QString host, quint16 port, QString domain, QString username, QString password);
 	~SMTPClient();
-	bool sendMail();
+	bool sendMail(Mail mail);
 	bool connect();
 
 private:
@@ -24,9 +24,12 @@ private:
 	bool disconnected;
 
 	bool sendHello();
+	bool sendAuth();
+	bool sendUser();
+	bool sendPass();
 	bool sendMailFrom();
-	bool sendReceiptTo();
-	bool sendBodyData();
+	bool sendReceiptTo(Mail mail);
+	bool sendBodyData(Mail mail);
 	bool sendQuit();
 	bool waitForSent();
 
