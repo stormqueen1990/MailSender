@@ -9,6 +9,9 @@ SMTPClient::SMTPClient(QString host, quint16 port, QString domain, QString usern
 	this->password = password;
 	this->disconnected = true;
 
+	// Adjusts codecs
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
 	// Connects the socket
 	smtpSocket = new QSslSocket();
 
