@@ -9,4 +9,4 @@ INCLUDEPATH += . src
 
 # Input
 HEADERS += src/Mail.hpp src/SMTPClient.hpp
-SOURCES += src/Mail.cpp src/main.cpp src/SMTPClient.cpp
+SOURCES += src/Mail.cpp src/SMTPClient.cpp
